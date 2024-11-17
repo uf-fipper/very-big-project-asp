@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asp", "Asp\Asp.csproj", "{64A4F298-79C9-4AA5-862A-C0572D30622E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{D23422F0-5E69-4AA9-8E12-9AF741210105}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{0EE3E10F-F98D-43D3-9CEC-96B3E00E1C0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64A4F298-79C9-4AA5-862A-C0572D30622E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64A4F298-79C9-4AA5-862A-C0572D30622E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64A4F298-79C9-4AA5-862A-C0572D30622E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64A4F298-79C9-4AA5-862A-C0572D30622E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D23422F0-5E69-4AA9-8E12-9AF741210105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D23422F0-5E69-4AA9-8E12-9AF741210105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D23422F0-5E69-4AA9-8E12-9AF741210105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D23422F0-5E69-4AA9-8E12-9AF741210105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EE3E10F-F98D-43D3-9CEC-96B3E00E1C0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE3E10F-F98D-43D3-9CEC-96B3E00E1C0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EE3E10F-F98D-43D3-9CEC-96B3E00E1C0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EE3E10F-F98D-43D3-9CEC-96B3E00E1C0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

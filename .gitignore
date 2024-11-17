@@ -1,0 +1,16 @@
+# obj
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# ide
+.idea
+.vscode/
+!.vscode/extensions.json
+Asp.sln.DotSettings.user
+
+# settings
+appsettings.json
+appsettings.*.json
