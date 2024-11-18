@@ -1,46 +1,58 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Asp.ControllerServices.MemberControllerServices;
-using Asp.DataModels;
-using Asp.DataModels.Members;
-using Asp.DataModels.Request.Members;
+using Asp.Models.Requests.Members;
+using Asp.Models.Responses;
+using Asp.Models.Responses.Members;
 using Microsoft.AspNetCore.Mvc;
 using Models.Context;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Asp.Controllers.MemberControllers;
 
-[Route("member")]
+[Route("[controller]/[action]")]
 public class MemberController(
     ILogger<MemberController> logger,
     DatabaseContext context,
     MemberService memberService
 ) : Controller
 {
-    [HttpGet("getMember")]
+    /// <summary>
+    /// 获取用户信息
+    /// </summary>
+    /// <param name="token">用户token</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// 这是remarks
+    /// </remarks>
+    [HttpGet]
+    [ProducesResponseType(typeof(ResultSuccess<ResMember>), 200)]
+    [ProducesResponseType(typeof(ResultError<string>), 401)]
     public async Task<IActionResult> GetMember([FromHeader, Required] string token)
     {
-        ResMember? member = await memberService.GetMemberFromToken(token);
-        if (member == null)
-            return Unauthorized(Result.Error("用户不存在"));
-        return Ok(Result.Success(member));
+        var result = await memberService.GetMemberFromToken(token);
+        if (result is ResultSuccess<ResMember>)
+            return Ok(result);
+        return Unauthorized(result);
     }
 
-    [HttpPost("register")]
+    /// <summary>
+    /// 用户注册
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [SwaggerResponse(200, "用户已存在", typeof(ResultError<string>))]
+    [SwaggerResponse(200, "注册成功", typeof(ResultSuccess<ResMember>))]
     public async Task<IActionResult> Register([FromBody, Required] ReqRegister args)
     {
-        if (args.Username.Length is < 6 or > 20)
-            return Ok(Result.Error("用户昵称必须在6到20个字符之间"));
-        if (args.Password.Length < 6)
-            return Ok(Result.Error("密码长度不能低于6个字符"));
-        ResMember member = await memberService.Register(args);
-        return Ok(Result.Success(member));
+        var result = await memberService.Register(args);
+        return Ok(result);
     }
 
-    [HttpPost("login")]
+    [HttpPost]
     public async Task<IActionResult> Login([FromBody, Required] ReqLogin args)
     {
-        ResMember? member = await memberService.Login(args);
-        if (member == null)
-            return Ok(Result.Error("用户不存在"));
-        return Ok(Result.Success("用户登陆成功"));
+        var result = await memberService.Login(args);
+        return Ok(result);
     }
 }

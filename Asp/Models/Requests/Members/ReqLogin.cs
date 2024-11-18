@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Asp.DataModels.Request.Members;
+namespace Asp.Models.Requests.Members;
 
 public class ReqLogin
 {

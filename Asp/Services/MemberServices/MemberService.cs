@@ -1,11 +1,13 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using Asp.DataModels.Members;
-using Asp.DataModels.Request.Members;
+using Asp.Models.Requests.Members;
+using Asp.Models.Responses;
+using Asp.Models.Responses.Members;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Models.Context;
 using Models.Models;
+using MySqlConnector;
 using StackExchange.Redis;
 
 namespace Asp.ControllerServices.MemberControllerServices;
@@ -59,29 +61,31 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
 
     public string GenerateToken() => Utils.Utils.GenerateRandomString(64);
 
-    public async Task<ResMember?> GetMemberFromToken(string token)
+    public async Task<Result> GetMemberFromToken(string token)
     {
-        var memberToken = await context
-            .MemberTokens.Include(memberToken => memberToken.Member)
-            .FirstOrDefaultAsync(x => x.Token == token);
+        var memberToken = await MemberToken.FromToken(
+            context,
+            token,
+            q => q.Include(mt => mt.Member)
+        );
         var member = memberToken?.Member;
-        return member;
+        if (member == null)
+        {
+            return Result.Error("用户不存在");
+        }
+        return Result.Success<ResMember>(member);
     }
 
-    public async Task<ResMember?> GetMemberFromMemcode(string memcode)
-    {
-        var member = await context.Members.FirstOrDefaultAsync(x => x.Memcode == memcode);
-        return member;
-    }
-
-    public async Task<ResMember> Register(ReqRegister args)
+    public async Task<Result> Register(ReqRegister args)
     {
         string username = args.Username;
         string password = args.Password;
-        if (username.Length is < 6 or > 20)
-            throw new ArgumentException("Username must be between 6 and 20 characters.");
-        if (password.Length < 6)
-            throw new ArgumentException("password must be more than 6 characters.");
+
+        var nowMember = await context.Members.FirstOrDefaultAsync(x => x.Username == username);
+        if (nowMember != null)
+        {
+            return Result.Error("用户已存在", "USER_EXISTS");
+        }
 
         // get member code
         string memcode = Utils.Utils.GenerateRandomString(16);
@@ -93,19 +97,12 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
             Nickname = "大佬！",
         };
         await context.Members.AddAsync(member);
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateException e)
-        {
-            throw;
-        }
+        await context.SaveChangesAsync();
 
-        return member;
+        return Result.Success<ResMember>(member);
     }
 
-    public async Task<ResMember?> Login(ReqLogin args)
+    public async Task<Result> Login(ReqLogin args)
     {
         string username = args.Username;
         string password = HashPassword(args.Password);
@@ -113,8 +110,8 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
             .Members.Where(x => x.Username == username && x.Password == password)
             .FirstOrDefaultAsync();
         if (member == null)
-            return null;
-        var token = GenerateToken();
+            return Result.Error("用户名或密码错误");
+        string token = GenerateToken();
         DateTime now = DateTime.Now;
         var memberToken = new MemberToken
         {
@@ -127,6 +124,6 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         await context.MemberTokens.AddAsync(memberToken);
         ResMember resMember = member;
         resMember.Token = token;
-        return resMember;
+        return Result.Success(resMember);
     }
 }

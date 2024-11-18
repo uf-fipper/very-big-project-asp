@@ -8,7 +8,7 @@ namespace Models.Models;
 
 [Table("member_token")]
 [Index("MemberId", "Token", Name = "member_id", IsUnique = true)]
-[Index("Token", Name = "token")]
+[Index("Token", Name = "token", IsUnique = true)]
 public partial class MemberToken
 {
     [Key]

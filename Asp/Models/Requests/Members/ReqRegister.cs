@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Asp.DataModels.Request.Members;
+namespace Asp.Models.Requests.Members;
 
 public class ReqRegister
 {
     [Required]
     [JsonPropertyName("username")]
+    [StringLength(20, MinimumLength = 6, ErrorMessage = "用户名必须在6到20个字符之间")]
     public required string Username { get; set; }
 
     [Required]
     [JsonPropertyName("password")]
+    [StringLength(32, MinimumLength = 6, ErrorMessage = "密码必须在6到20个字符之间")]
     public required string Password { get; set; }
 }

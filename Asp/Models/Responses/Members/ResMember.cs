@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Models.Models;
 
-namespace Asp.DataModels.Members;
+namespace Asp.Models.Responses.Members;
 
 public class ResMember
 {

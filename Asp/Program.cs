@@ -1,6 +1,7 @@
 using System.Reflection;
 using Asp.ControllerServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Models.Context;
 using StackExchange.Redis;
 
@@ -31,9 +32,10 @@ string redisConnectionString =
     builder.Configuration.GetConnectionString("RedisConnection")
     ?? throw new InvalidOperationException("Connection string 'RedisConnection' not found.");
 
-IConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
+var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 
-builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(redis);
+builder.Services.AddSingleton<ConnectionMultiplexer>(redis);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<StackExchange.Redis.IDatabase>(redis.GetDatabase());
 
 #endregion
@@ -51,6 +53,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "A Very Big Project",
+            Description = "This is a very Big Project!!!!",
+        }
+    );
+
+    // 允许解析xml
+    string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    // 允许 oneOf
+    options.UseOneOfForPolymorphism();
+    // 允许 allOf
+    options.UseAllOfForInheritance();
+    // 使用自定义 schemaId
+    // options.CustomSchemaIds(type => $"{type.Name}_{type.GUID}");
+});
 #endregion
 
 // Add services to the container.
