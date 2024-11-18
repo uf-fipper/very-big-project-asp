@@ -6,16 +6,12 @@ namespace Asp.DataModels.Members;
 
 public class ResMember
 {
-    [JsonPropertyName("memcode")]
     public string? Memcode { get; set; }
 
-    [JsonPropertyName("username")]
     public required string Username { get; set; }
 
-    [JsonPropertyName("nickname")]
     public required string Nickname { get; set; }
 
-    [JsonPropertyName("token")]
     public string? Token { get; set; }
 
     [return: NotNullIfNotNull(nameof(member))]

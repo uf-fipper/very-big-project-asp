@@ -3,12 +3,15 @@ using System.Text;
 using Asp.DataModels.Members;
 using Asp.DataModels.Request.Members;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Models.Context;
 using Models.Models;
+using StackExchange.Redis;
 
 namespace Asp.ControllerServices.MemberControllerServices;
 
-public class MemberService(ILogger<MemberService> logger, DatabaseContext context)
+[Service]
+public class MemberService(ILogger<MemberService> logger, DatabaseContext context, IDatabase redis)
 {
     private readonly char[] _randomChars =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();

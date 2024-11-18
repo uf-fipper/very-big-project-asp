@@ -1,9 +1,12 @@
+using System.Reflection;
 using Asp.ControllerServices;
 using Microsoft.EntityFrameworkCore;
 using Models.Context;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// cors
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -12,21 +15,32 @@ builder.Services.AddCors(options =>
     });
 });
 
-#region db context
+#region db
 
-string connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// mysql
+string mysqlConnectionString =
+    builder.Configuration.GetConnectionString("MysqlConnection")
+    ?? throw new InvalidOperationException("Connection string 'MysqlConnection' not found.");
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 3)))
+    options.UseMySql(mysqlConnectionString, new MySqlServerVersion(new Version(8, 4, 3)))
 );
+
+// redis
+string redisConnectionString =
+    builder.Configuration.GetConnectionString("RedisConnection")
+    ?? throw new InvalidOperationException("Connection string 'RedisConnection' not found.");
+
+IConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
+
+builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(redis);
+builder.Services.AddSingleton<StackExchange.Redis.IDatabase>(redis.GetDatabase());
 
 #endregion
 
 #region controller
 
-builder.Services.AddControllerServices();
+builder.Services.TryAddServices();
 
 builder.Services.AddControllers();
 
