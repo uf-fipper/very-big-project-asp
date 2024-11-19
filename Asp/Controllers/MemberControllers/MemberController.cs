@@ -26,14 +26,14 @@ public class MemberController(
     /// 这是remarks
     /// </remarks>
     [HttpGet]
-    [ProducesResponseType(typeof(ResultSuccess<ResMember>), 200)]
-    [ProducesResponseType(typeof(ResultError<string>), 401)]
+    [SwaggerResponse(200, "获取用户成功", typeof(ResultSuccess<ResMember>))]
+    [SwaggerResponse(401, "用户信息失效", typeof(ResultSuccess<string>))]
     public async Task<IActionResult> GetMember([FromHeader, Required] string token)
     {
         var result = await memberService.GetMemberFromToken(token);
-        if (result is ResultSuccess<ResMember>)
-            return Ok(result);
-        return Unauthorized(result);
+        if (result is ResultError { Code: "401" })
+            return Unauthorized(result);
+        return Ok(result);
     }
 
     /// <summary>
@@ -60,6 +60,22 @@ public class MemberController(
     public async Task<IActionResult> Login([FromBody, Required] ReqLogin args)
     {
         var result = await memberService.Login(args.Username, args.Password);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// 退出登录
+    /// </summary>
+    /// <param name="token">token</param>
+    /// <returns></returns>
+    [HttpPost]
+    [SwaggerResponse(200, "登出成功", typeof(ResultSuccess<bool>))]
+    [SwaggerResponse(401, "用户信息失效", typeof(ResultSuccess<string>))]
+    public async Task<IActionResult> Logout([FromHeader, Required] string token)
+    {
+        var result = await memberService.Logout(token);
+        if (result is ResultError { Code: "401" })
+            return Unauthorized(result);
         return Ok(result);
     }
 }

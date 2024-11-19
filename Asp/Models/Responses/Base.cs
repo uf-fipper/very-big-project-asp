@@ -4,27 +4,38 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Asp.Models.Responses;
 
-public class Result(int ret, long? timestamp = null)
+public abstract class Result(int ret)
 {
     public int Ret { get; set; } = ret;
 
-    public long Timestamp { get; set; } = timestamp ?? DateTime.Now.Millisecond;
+    public long Timestamp { get; set; } = ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds();
 
     public static ResultSuccess<T> Success<T>(T data) => new(data);
 
     public static ResultError<T> Error<T>(T data) => new(data);
 
     public static ResultError<T> Error<T>(T data, string code) => new(data, code);
+
+    public static ResultError<string> TokenExpired() => new("请登录", "401");
+
+    public static ResultError<T> TokenExpired<T>(T data) => new(data, "401");
 }
 
-public class ResultSuccess<T>(T data) : Result(1)
+public abstract class ResultSuccess() : Result(1) { }
+
+public class ResultSuccess<T>(T data) : ResultSuccess
 {
     public T Data { get; set; } = data;
 }
 
-public class ResultError<T>(T data, string? code = null) : Result(0)
+public abstract class ResultError() : Result(0)
+{
+    public abstract string Code { get; set; }
+}
+
+public class ResultError<T>(T data, string? code = null) : ResultError
 {
     public T Data { get; set; } = data;
 
-    public string Code { get; set; } = code ?? "error";
+    public override string Code { get; set; } = code ?? "error";
 }

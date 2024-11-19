@@ -3,6 +3,8 @@ using System.Text;
 using Asp.Models.Requests.Members;
 using Asp.Models.Responses;
 using Asp.Models.Responses.Members;
+using Asp.Services.ConstantsServices;
+using Asp.Utils;
 using Microsoft.EntityFrameworkCore;
 using Models.Context;
 using Models.Models;
@@ -14,10 +16,12 @@ namespace Asp.Services.MemberServices;
 [Service]
 public class MemberService(ILogger<MemberService> logger, DatabaseContext context, IDatabase redis)
 {
-    private readonly char[] _randomChars =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
-
-    public string HashPassword(string raw)
+    /// <summary>
+    /// 密码哈希方法
+    /// </summary>
+    /// <param name="raw">原始密码</param>
+    /// <returns>哈希后的字符串</returns>
+    private static string HashPassword(string raw)
     {
         // 加盐
         string text = $"very-big{raw}project";
@@ -58,27 +62,36 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         }
     }
 
-    public string GenerateToken() => Utils.Utils.GenerateRandomString(64);
+    /// <summary>
+    /// 生成token
+    /// </summary>
+    /// <returns>token</returns>
+    private static string GenerateToken() => StringUtils.GenerateRandomString(64);
 
+    /// <summary>
+    /// 从token获取member
+    /// </summary>
+    /// <param name="token">token</param>
+    /// <returns></returns>
     public async Task<Result> GetMemberFromToken(string token)
     {
-        var memberToken = await context
-            .MemberTokens.WhereToken(token)
-            .Include(mt => mt.Member)
-            .FirstOrDefaultAsync();
-        var member = memberToken?.Member;
+        string redisKey = Constants.GetMemberFromToken(token);
+        Member? member = await redis.ObjectGetAsync<Member>(redisKey);
         if (member == null)
         {
-            return Result.Error("用户不存在");
+            return Result.TokenExpired();
         }
 
-        var now = DateTime.Now;
-        memberToken!.LastUseTime = now;
-        memberToken!.ExpireTime = now + TimeSpan.FromDays(3);
-        await context.SaveChangesAsync();
+        await redis.ObjectSetAsync(redisKey, member, TimeSpan.FromDays(3));
         return Result.Success<ResMember>(member);
     }
 
+    /// <summary>
+    /// 用户注册
+    /// </summary>
+    /// <param name="username">用户名</param>
+    /// <param name="password">密码</param>
+    /// <returns></returns>
     public async Task<Result> Register(string username, string password)
     {
         var nowMember = await context.Members.FirstOrDefaultAsync(x => x.Username == username);
@@ -88,7 +101,7 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         }
 
         // get member code
-        string memcode = Utils.Utils.GenerateRandomString(16);
+        string memcode = StringUtils.GenerateRandomString(16);
         var member = new Member
         {
             Memcode = memcode,
@@ -102,18 +115,32 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         return Result.Success<ResMember>(member);
     }
 
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    /// <param name="username">用户名</param>
+    /// <param name="password">密码</param>
+    /// <returns></returns>
     public async Task<Result> Login(string username, string password)
     {
+        await using var redisLock = await redis.LockAsync(
+            Constants.GetLockKey(username),
+            TimeSpan.FromSeconds(30)
+        );
+        if (!redisLock.Locked)
+            return Result.Error("操作太快，请稍后重试", "TOO_FAST");
         password = HashPassword(password);
         var member = await context
             .Members.Where(x => x.Username == username && x.Password == password)
+            .Include(m => m.MemberTokens.Take(1))
             .FirstOrDefaultAsync();
         if (member == null)
             return Result.Error("用户名或密码错误");
 
-        var memberToken = await context.MemberTokens.MustAvailable().FirstOrDefaultAsync();
+        var memberToken = member.MemberTokens.FirstOrDefault();
         bool isUpdate;
 
+        string? oldToken = null;
         string token = GenerateToken();
         DateTime now = DateTime.Now;
         if (memberToken == null)
@@ -121,22 +148,28 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
             memberToken = new MemberToken
             {
                 MemberId = member.Id,
-                Status = 1,
                 Token = token,
-                LastUseTime = now,
                 LastLoginTime = now,
-                ExpireTime = now + TimeSpan.FromDays(3),
             };
             await context.AddAsync(memberToken);
             isUpdate = false;
         }
         else
         {
+            oldToken = memberToken.Token;
             memberToken.Token = token;
+            memberToken.LastLoginTime = now;
             isUpdate = true;
         }
 
         await context.SaveChangesAsync();
+        string redisKey = Constants.GetMemberFromToken(token);
+        if (oldToken != null)
+            await Logout(oldToken);
+        var oldMemberTokens = member.MemberTokens;
+        member.MemberTokens = [];
+        await redis.ObjectSetAsync(redisKey, member, TimeSpan.FromDays(3));
+        member.MemberTokens = oldMemberTokens;
         ResLoginMember resMember = new ResLoginMember
         {
             IsUpdate = isUpdate,
@@ -146,5 +179,12 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
             Username = member.Username,
         };
         return Result.Success(resMember);
+    }
+
+    public async Task<Result> Logout(string token)
+    {
+        string redisKey = Constants.GetMemberFromToken(token);
+        bool isDelete = await redis.KeyDeleteAsync(redisKey);
+        return Result.Success(isDelete);
     }
 }

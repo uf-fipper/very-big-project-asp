@@ -1,6 +1,6 @@
-﻿namespace Utils;
+﻿namespace Asp.Utils;
 
-public static class Utils
+public class StringUtils
 {
     private static readonly char[] RandomChars =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();

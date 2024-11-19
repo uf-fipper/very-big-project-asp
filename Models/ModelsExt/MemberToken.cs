@@ -15,7 +15,4 @@ public static partial class MemberExt
         this IQueryable<MemberToken> query,
         string token
     ) => query.Where(m => m.Token == token);
-
-    public static IQueryable<MemberToken> MustAvailable(this IQueryable<MemberToken> query) =>
-        query.Where(m => m.Status == true && DateTime.Now < m.ExpireTime);
 }

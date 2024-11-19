@@ -29,28 +29,10 @@ public partial class MemberToken
     public string Token { get; set; } = null!;
 
     /// <summary>
-    /// 状态
-    /// </summary>
-    [Column("status")]
-    public bool Status { get; set; }
-
-    /// <summary>
     /// 最后登录时间
     /// </summary>
     [Column("last_login_time", TypeName = "datetime")]
     public DateTime LastLoginTime { get; set; }
-
-    /// <summary>
-    /// 最后使用时间
-    /// </summary>
-    [Column("last_use_time", TypeName = "datetime")]
-    public DateTime LastUseTime { get; set; }
-
-    /// <summary>
-    /// 失效时间
-    /// </summary>
-    [Column("expire_time", TypeName = "datetime")]
-    public DateTime ExpireTime { get; set; }
 
     [Column("create_time", TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
