@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Asp.ControllerServices;
+namespace Asp.Services;
 
 public static class Startup
 {
-    public static IServiceCollection TryAddServices(this IServiceCollection service)
+    public static WebApplicationBuilder TryAddServices(this WebApplicationBuilder builder)
     {
         var types = AppDomain
             .CurrentDomain.GetAssemblies()
@@ -16,10 +15,9 @@ public static class Startup
         foreach (var type in types)
         {
             var attribute = (ServiceAttribute)type.GetCustomAttribute(typeof(ServiceAttribute))!;
-            service.TryAdd(
-                ServiceDescriptor.Describe(attribute.ServiceType ?? type, type, attribute.Lifetime)
-            );
+            attribute.TryAddService(builder, type);
         }
-        return service;
+
+        return builder;
     }
 }

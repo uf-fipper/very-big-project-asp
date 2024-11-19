@@ -1,14 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Asp.ControllerServices.MemberControllerServices;
 using Asp.Models.Requests.Members;
 using Asp.Models.Responses;
 using Asp.Models.Responses.Members;
+using Asp.Services.MemberServices;
 using Microsoft.AspNetCore.Mvc;
 using Models.Context;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Asp.Controllers.MemberControllers;
 
+[ApiController]
 [Route("[controller]/[action]")]
 public class MemberController(
     ILogger<MemberController> logger,
@@ -45,14 +46,20 @@ public class MemberController(
     [SwaggerResponse(200, "注册成功", typeof(ResultSuccess<ResMember>))]
     public async Task<IActionResult> Register([FromBody, Required] ReqRegister args)
     {
-        var result = await memberService.Register(args);
+        var result = await memberService.Register(args.Username, args.Password);
         return Ok(result);
     }
 
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
     [HttpPost]
+    [SwaggerResponse(200, "登录成功", typeof(ResultSuccess<ResLoginMember>))]
     public async Task<IActionResult> Login([FromBody, Required] ReqLogin args)
     {
-        var result = await memberService.Login(args);
+        var result = await memberService.Login(args.Username, args.Password);
         return Ok(result);
     }
 }

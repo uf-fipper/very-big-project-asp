@@ -39,6 +39,7 @@ public partial class DatabaseContext : DbContext
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.ExpireTime).HasComment("失效时间");
             entity.Property(e => e.LastLoginTime).HasComment("最后登录时间");
             entity.Property(e => e.LastUseTime).HasComment("最后使用时间");
             entity.Property(e => e.MemberId).HasComment("用户id");

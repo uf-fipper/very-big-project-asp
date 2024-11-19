@@ -4,13 +4,12 @@ using Asp.Models.Requests.Members;
 using Asp.Models.Responses;
 using Asp.Models.Responses.Members;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Models.Context;
 using Models.Models;
-using MySqlConnector;
+using Models.ModelsExt;
 using StackExchange.Redis;
 
-namespace Asp.ControllerServices.MemberControllerServices;
+namespace Asp.Services.MemberServices;
 
 [Service]
 public class MemberService(ILogger<MemberService> logger, DatabaseContext context, IDatabase redis)
@@ -63,24 +62,25 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
 
     public async Task<Result> GetMemberFromToken(string token)
     {
-        var memberToken = await MemberToken.FromToken(
-            context,
-            token,
-            q => q.Include(mt => mt.Member)
-        );
+        var memberToken = await context
+            .MemberTokens.WhereToken(token)
+            .Include(mt => mt.Member)
+            .FirstOrDefaultAsync();
         var member = memberToken?.Member;
         if (member == null)
         {
             return Result.Error("用户不存在");
         }
+
+        var now = DateTime.Now;
+        memberToken!.LastUseTime = now;
+        memberToken!.ExpireTime = now + TimeSpan.FromDays(3);
+        await context.SaveChangesAsync();
         return Result.Success<ResMember>(member);
     }
 
-    public async Task<Result> Register(ReqRegister args)
+    public async Task<Result> Register(string username, string password)
     {
-        string username = args.Username;
-        string password = args.Password;
-
         var nowMember = await context.Members.FirstOrDefaultAsync(x => x.Username == username);
         if (nowMember != null)
         {
@@ -102,28 +102,49 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         return Result.Success<ResMember>(member);
     }
 
-    public async Task<Result> Login(ReqLogin args)
+    public async Task<Result> Login(string username, string password)
     {
-        string username = args.Username;
-        string password = HashPassword(args.Password);
+        password = HashPassword(password);
         var member = await context
             .Members.Where(x => x.Username == username && x.Password == password)
             .FirstOrDefaultAsync();
         if (member == null)
             return Result.Error("用户名或密码错误");
+
+        var memberToken = await context.MemberTokens.MustAvailable().FirstOrDefaultAsync();
+        bool isUpdate;
+
         string token = GenerateToken();
         DateTime now = DateTime.Now;
-        var memberToken = new MemberToken
+        if (memberToken == null)
         {
-            MemberId = member.Id,
-            Status = 1,
+            memberToken = new MemberToken
+            {
+                MemberId = member.Id,
+                Status = 1,
+                Token = token,
+                LastUseTime = now,
+                LastLoginTime = now,
+                ExpireTime = now + TimeSpan.FromDays(3),
+            };
+            await context.AddAsync(memberToken);
+            isUpdate = false;
+        }
+        else
+        {
+            memberToken.Token = token;
+            isUpdate = true;
+        }
+
+        await context.SaveChangesAsync();
+        ResLoginMember resMember = new ResLoginMember
+        {
+            IsUpdate = isUpdate,
+            Memcode = member.Memcode,
+            Nickname = member.Nickname,
             Token = token,
-            LastUseTime = now,
-            LastLoginTime = now,
+            Username = member.Username,
         };
-        await context.MemberTokens.AddAsync(memberToken);
-        ResMember resMember = member;
-        resMember.Token = token;
         return Result.Success(resMember);
     }
 }

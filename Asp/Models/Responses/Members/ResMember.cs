@@ -12,8 +12,6 @@ public class ResMember
 
     public required string Nickname { get; set; }
 
-    public string? Token { get; set; }
-
     [return: NotNullIfNotNull(nameof(member))]
     public static implicit operator ResMember?(Member? member) => FromMember(member);
 

@@ -32,7 +32,7 @@ public partial class MemberToken
     /// 状态
     /// </summary>
     [Column("status")]
-    public int Status { get; set; }
+    public bool Status { get; set; }
 
     /// <summary>
     /// 最后登录时间
@@ -45,6 +45,12 @@ public partial class MemberToken
     /// </summary>
     [Column("last_use_time", TypeName = "datetime")]
     public DateTime LastUseTime { get; set; }
+
+    /// <summary>
+    /// 失效时间
+    /// </summary>
+    [Column("expire_time", TypeName = "datetime")]
+    public DateTime ExpireTime { get; set; }
 
     [Column("create_time", TypeName = "datetime")]
     public DateTime CreateTime { get; set; }

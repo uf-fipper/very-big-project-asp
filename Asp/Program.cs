@@ -1,5 +1,5 @@
 using System.Reflection;
-using Asp.ControllerServices;
+using Asp.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Models.Context;
@@ -42,7 +42,7 @@ builder.Services.AddSingleton<StackExchange.Redis.IDatabase>(redis.GetDatabase()
 
 #region controller
 
-builder.Services.TryAddServices();
+builder.TryAddServices();
 
 builder.Services.AddControllers();
 
