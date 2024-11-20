@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace Asp.Services.MemberServices;
 
-[Service]
+// [Service]
 public class GetMemberService(HttpContext context, IDatabase redis)
 {
     public Member? Value
