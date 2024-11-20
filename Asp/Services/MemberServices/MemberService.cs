@@ -3,6 +3,7 @@ using System.Text;
 using Asp.Models.Requests.Members;
 using Asp.Models.Responses;
 using Asp.Models.Responses.Members;
+using Asp.Services.Attributes;
 using Asp.Services.ConstantsServices;
 using Asp.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -75,7 +76,7 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
     /// <returns></returns>
     public async Task<Result> GetMemberFromToken(string token)
     {
-        string redisKey = Constants.GetMemberFromToken(token);
+        string redisKey = Constants.GetMemberKeyFromToken(token);
         Member? member = await redis.ObjectGetAsync<Member>(redisKey);
         if (member == null)
         {
@@ -163,7 +164,7 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
         }
 
         await context.SaveChangesAsync();
-        string redisKey = Constants.GetMemberFromToken(token);
+        string redisKey = Constants.GetMemberKeyFromToken(token);
         if (oldToken != null)
             await Logout(oldToken);
         var oldMemberTokens = member.MemberTokens;
@@ -183,7 +184,7 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
 
     public async Task<Result> Logout(string token)
     {
-        string redisKey = Constants.GetMemberFromToken(token);
+        string redisKey = Constants.GetMemberKeyFromToken(token);
         bool isDelete = await redis.KeyDeleteAsync(redisKey);
         return Result.Success(isDelete);
     }

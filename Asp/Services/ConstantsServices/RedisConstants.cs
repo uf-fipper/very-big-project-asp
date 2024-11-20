@@ -7,7 +7,7 @@ public partial class Constants
     /// </summary>
     public const string MemberTokenPrefix = "MEMBER_TOKEN";
 
-    public static string GetMemberFromToken(string token) => $"{MemberTokenPrefix}:{token}";
+    public static string GetMemberKeyFromToken(string token) => $"{MemberTokenPrefix}:{token}";
 
     /// <summary>
     /// 锁的前缀

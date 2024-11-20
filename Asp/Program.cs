@@ -7,7 +7,8 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// cors
+#region cors
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -15,6 +16,8 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
+
+#endregion
 
 #region db
 
@@ -41,8 +44,6 @@ builder.Services.AddSingleton<StackExchange.Redis.IDatabase>(redis.GetDatabase()
 #endregion
 
 #region controller
-
-builder.TryAddServices();
 
 builder.Services.AddControllers();
 
@@ -77,6 +78,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 #endregion
 
+builder.ExtraBuild();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -90,13 +93,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCors();
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.ExtraUse();
+
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -104,6 +108,8 @@ app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Inde
 app.MapControllers();
 
 app.MapSwagger();
+
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {

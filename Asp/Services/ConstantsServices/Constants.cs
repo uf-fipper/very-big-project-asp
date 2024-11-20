@@ -1,4 +1,6 @@
-﻿namespace Asp.Services.ConstantsServices;
+﻿using Asp.Services.Attributes;
+
+namespace Asp.Services.ConstantsServices;
 
 using Services = ServiceAttribute;
 

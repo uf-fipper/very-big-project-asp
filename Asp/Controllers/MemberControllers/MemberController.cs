@@ -21,6 +21,7 @@ public class MemberController(
     /// 获取用户信息
     /// </summary>
     /// <param name="token">用户token</param>
+    /// <param name="getMemberService"></param>
     /// <returns></returns>
     /// <remarks>
     /// 这是remarks
@@ -28,7 +29,10 @@ public class MemberController(
     [HttpGet]
     [SwaggerResponse(200, "获取用户成功", typeof(ResultSuccess<ResMember>))]
     [SwaggerResponse(401, "用户信息失效", typeof(ResultSuccess<string>))]
-    public async Task<IActionResult> GetMember([FromHeader, Required] string token)
+    public async Task<IActionResult> GetMember(
+        [FromHeader, Required] string token,
+        [FromServices] GetMemberService getMemberService
+    )
     {
         var result = await memberService.GetMemberFromToken(token);
         if (result is ResultError { Code: "401" })
