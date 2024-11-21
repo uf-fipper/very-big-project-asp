@@ -9,7 +9,8 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Asp/Asp.csproj", "Asp/"]
 COPY ["Models/Models.csproj", "Models/"]
-RUN dotnet restore "Asp/Asp.csproj"
+COPY ["NuGet.Config", "./"]
+RUN dotnet restore "Asp/Asp.csproj" --configfile "NuGet.Config"
 COPY . .
 WORKDIR "/src/Asp"
 RUN dotnet build "Asp.csproj" -c $BUILD_CONFIGURATION -o /app/build
