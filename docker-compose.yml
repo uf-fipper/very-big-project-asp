@@ -1,9 +1,4 @@
 ﻿services:
-  Models:
-    image: asp-models
-    build:
-      context: .
-      dockerfile: Models/Dockerfile
   Asp:
     image: asp
     build:

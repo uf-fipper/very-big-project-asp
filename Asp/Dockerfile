@@ -8,6 +8,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Asp/Asp.csproj", "Asp/"]
+COPY ["Models/Models.csproj", "Models/"]
 RUN dotnet restore "Asp/Asp.csproj"
 COPY . .
 WORKDIR "/src/Asp"
