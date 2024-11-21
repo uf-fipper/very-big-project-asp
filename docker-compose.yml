@@ -1,0 +1,6 @@
+﻿services:
+  Asp:
+    image: asp
+    build:
+      context: .
+      dockerfile: Asp/Dockerfile
