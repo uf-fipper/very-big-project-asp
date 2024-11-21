@@ -103,13 +103,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseCors();
+
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
 
 app.MapSwagger();
-
-app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
