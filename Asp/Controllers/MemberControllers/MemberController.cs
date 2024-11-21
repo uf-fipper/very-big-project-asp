@@ -3,6 +3,7 @@ using Asp.Models.Requests.Members;
 using Asp.Models.Responses;
 using Asp.Models.Responses.Members;
 using Asp.Services.MemberServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Context;
 using Swashbuckle.AspNetCore.Annotations;
@@ -26,8 +27,9 @@ public class MemberController(
     /// 这是remarks
     /// </remarks>
     [HttpGet]
+    [Authorize]
     [SwaggerResponse(200, "获取用户成功", typeof(ResultSuccess<ResMember>))]
-    [SwaggerResponse(401, "用户信息失效", typeof(ResultSuccess<string>))]
+    [SwaggerResponse(401, "用户信息失效")]
     public async Task<IActionResult> GetMember([FromHeader, Required] string token)
     {
         var result = await memberService.GetMemberFromToken(token);
@@ -69,8 +71,9 @@ public class MemberController(
     /// <param name="token">token</param>
     /// <returns></returns>
     [HttpPost]
+    [Authorize]
     [SwaggerResponse(200, "登出成功", typeof(ResultSuccess<bool>))]
-    [SwaggerResponse(401, "用户信息失效", typeof(ResultSuccess<string>))]
+    [SwaggerResponse(401, "用户信息失效")]
     public async Task<IActionResult> Logout([FromHeader, Required] string token)
     {
         var result = await memberService.Logout(token);

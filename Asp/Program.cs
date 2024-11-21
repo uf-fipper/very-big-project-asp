@@ -1,11 +1,21 @@
 using System.Reflection;
 using Asp.Services;
+using Asp.Services.AuthorizeExtra;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Models.Context;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region auth
+
+builder
+    .Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, MemberAuthenticationHandler>("Member", null);
+
+#endregion
 
 #region cors
 
