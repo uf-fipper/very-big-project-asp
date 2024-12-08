@@ -29,7 +29,7 @@ public class MemberController(
     [HttpGet]
     [Authorize]
     [SwaggerResponse(200, "获取用户成功", typeof(ResultSuccess<ResMember>))]
-    [SwaggerResponse(401, "用户信息失效")]
+    [SwaggerResponse(401, "用户信息失效", typeof(ResultError<string>))]
     public async Task<IActionResult> GetMember([FromHeader, Required] string token)
     {
         var result = await memberService.GetMemberFromToken(token);

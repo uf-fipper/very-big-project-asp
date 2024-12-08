@@ -20,7 +20,6 @@ public class GetMemberService(HttpContext context, IDatabase redis)
     }
 }
 
-[Middleware]
 public class GetMemberMiddleware(RequestDelegate next, IDatabase redis)
 {
     public async Task InvokeAsync(HttpContext context)

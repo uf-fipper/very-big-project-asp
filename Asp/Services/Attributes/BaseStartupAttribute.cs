@@ -7,6 +7,4 @@ namespace Asp.Services.Attributes;
 public abstract class BaseStartupAttribute : Attribute
 {
     public virtual void ExtraBuild(WebApplicationBuilder builder, Type type) { }
-
-    public virtual void ExtraUse(WebApplication app, Type type) { }
 }
