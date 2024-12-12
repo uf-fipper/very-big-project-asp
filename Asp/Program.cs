@@ -15,6 +15,8 @@ builder
     .Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, MemberAuthenticationHandler>("Member", null);
 
+// builder.Services.AddAuthorization().AddSingleton<MemberAuthorizationHandler>();
+
 #endregion
 
 #region cors
@@ -112,6 +114,8 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseWebSockets();
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 

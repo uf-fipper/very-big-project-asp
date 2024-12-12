@@ -74,17 +74,15 @@ public class MemberService(ILogger<MemberService> logger, DatabaseContext contex
     /// </summary>
     /// <param name="token">token</param>
     /// <returns></returns>
-    public async Task<Result> GetMemberFromToken(string token)
+    public async Task<Member?> GetMemberFromToken(string token)
     {
         string redisKey = Constants.GetMemberKeyFromToken(token);
         Member? member = await redis.ObjectGetAsync<Member>(redisKey);
         if (member == null)
-        {
-            return Result.TokenExpired();
-        }
+            return null;
 
         await redis.ObjectSetAsync(redisKey, member, TimeSpan.FromDays(3));
-        return Result.Success<ResMember>(member);
+        return member;
     }
 
     /// <summary>
