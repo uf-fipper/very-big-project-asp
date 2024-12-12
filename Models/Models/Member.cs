@@ -50,5 +50,11 @@ public partial class Member
     public DateTime? UpdateTime { get; set; }
 
     [InverseProperty("Member")]
+    public virtual ICollection<ChatPrivateMessage> ChatPrivateMessageMembers { get; set; } = new List<ChatPrivateMessage>();
+
+    [InverseProperty("ToMember")]
+    public virtual ICollection<ChatPrivateMessage> ChatPrivateMessageToMembers { get; set; } = new List<ChatPrivateMessage>();
+
+    [InverseProperty("Member")]
     public virtual ICollection<MemberToken> MemberTokens { get; set; } = new List<MemberToken>();
 }
