@@ -1,4 +1,4 @@
-﻿namespace Asp.Utils;
+﻿namespace Utils.StringUtils;
 
 public class StringUtils
 {

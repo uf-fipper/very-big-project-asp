@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Asp.Utils.RedisExt;
 using StackExchange.Redis;
 
-namespace Asp.Utils;
+namespace Utils.RedisUtils;
 
 public static class RedisUtils
 {

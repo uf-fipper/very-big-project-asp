@@ -1,9 +1,10 @@
 ﻿using Asp.Services.Attributes;
 using Asp.Services.ConstantsServices;
-using Asp.Utils;
 using Microsoft.Extensions.Primitives;
 using Models.Models;
 using StackExchange.Redis;
+using Utils;
+using Utils.RedisUtils;
 
 namespace Asp.Services.MemberServices;
 
